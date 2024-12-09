@@ -67,6 +67,45 @@ def populateGraph(xScale, yScale):
         gl.text(string(round(xScale * 0.5)))
     gl.translate (int2{495, 720}):
         gl.text(string(round(xScale * 0.25)))
+
+def drawBoxes(selected):
+    for(6) i:
+        if i == selected:
+            gl.color(color_yellow)
+        else:
+            gl.color(color_light_grey)
+        gl.translate(int2{50, 50 + (140 * i)}):
+            gl.rounded_rectangle(float2{150.0, 100.0}, 50, 0.2)
+
+def populateInputs(Dslope, Dinter, Sslope, Sinter, xScale, yScale):
+    gl.color(color_black)
+    gl.set_font_size(24)
+    //populate each input box with titles and curent values
+    gl.translate (int2{50, 26}):
+        gl.text("Demand Slope")
+    gl.translate (int2{90, 88}):
+        gl.text(string(int(Dslope)))
+    gl.translate (int2{50, 166}):
+        gl.text("Demand Intercept")
+    gl.translate (int2{75, 228}):
+        gl.text(string(int(Dinter)))
+    gl.translate (int2{50, 306}):
+        gl.text("Supply Slope")
+    gl.translate (int2{90, 368}):
+        gl.text(string(int(Sslope)))
+    gl.translate (int2{50, 446}):
+        gl.text("Supply Intercept")
+    gl.translate (int2{90, 504}):
+        gl.text(string(int(Sinter)))
+    gl.translate (int2{50, 586}):
+        gl.text("X Scale")
+    gl.translate (int2{90, 648}):
+        gl.text(string(xScale))
+    gl.translate (int2{50, 726}):
+        gl.text("Y Scale")
+    gl.translate (int2{90, 788}):
+        gl.text(string(yScale))
+    
 /*
 so i want some variables to be changeable but i need to code that in later
 
@@ -76,11 +115,12 @@ Suply slope = 5.0
 Suply Intercept = 0.0
 X scale = 100
 Y scale = 550
-selected box = 0
 */
 
 fatal(gl.window("Supply-Demand Simulation", 1324, 868))
 gl.set_font_name("Roboto-Regular.ttf")
+
+var cur_box = 0
 
 while gl.frame() and gl.button("escape") != 1:
 
@@ -89,6 +129,21 @@ while gl.frame() and gl.button("escape") != 1:
     drawGraph()
     drawLines(-5.0, 500.0, 5.0, 0.0)
     populateGraph(100, 550)
-    //mouse logic (changes boxes)
-    //adjust inputs
-    //display outputs
+    if gl.button("mouse1") == 1 and gl.mouse_pos(0)[0] > 50 and gl.mouse_pos(0)[0] < 200:
+        //change currently selected box based on
+        if gl.mouse_pos(0)[1] > 50 and gl.mouse_pos(0)[1] < 150:
+            cur_box = 0
+        if gl.mouse_pos(0)[1] > 190 and gl.mouse_pos(0)[1] < 290:
+            cur_box = 1
+        if gl.mouse_pos(0)[1] > 330 and gl.mouse_pos(0)[1] < 430:
+            cur_box = 2
+        if gl.mouse_pos(0)[1] > 470 and gl.mouse_pos(0)[1] < 570:
+            cur_box = 3
+        if gl.mouse_pos(0)[1] > 610 and gl.mouse_pos(0)[1] < 710:
+            cur_box = 4
+        if gl.mouse_pos(0)[1] > 740 and gl.mouse_pos(0)[1] < 840:
+            cur_box = 5
+    drawBoxes(cur_box)
+    //adjust inputs (0-9 + backspace)
+    populateInputs(-5.0, 500.0, 5.0, 0.0, 100, 550)
+    //display outputs (equilibriums, surplus)
