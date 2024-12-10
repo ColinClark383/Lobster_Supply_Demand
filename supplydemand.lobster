@@ -24,10 +24,10 @@ def drawGraph():
     gl.translate (int2{1025, 700}):
         gl.text("D")
 
-def drawLines(Dslope, Dinter, Sslope, Sinter):
+def drawLines(Dslope, Dinter, Sslope, Sinter, xScale, yScale):
     //find points for demand line
-    let Dpoint1 = float2{350.0, 700.0 - Dinter}
-    let Dpoint2 = float2{1000.0, 700.0 - Dinter - (100.0 * Dslope)}
+    let Dpoint1 = float2{350.0, 700.0 - Dinter * (550.0 / float(yScale))}
+    let Dpoint2 = float2{1000.0, 700.0 - (Dinter + (float(xScale) * Dslope)) * (550.0 / float(yScale))}
     gl.color(color_red)
     gl.line(Dpoint1, Dpoint2, 5.0)
     //indicate Demand curve
@@ -37,8 +37,8 @@ def drawLines(Dslope, Dinter, Sslope, Sinter):
 
 
     //find points for suply line
-    let Spoint1 = float2{350.0, 700.0 - Sinter}
-    let Spoint2 = float2{1000.0, 700.0 - Sinter - (100.0 * Sslope)}
+    let Spoint1 = float2{350.0, 700.0 - Sinter * (550.0 / float(yScale))}
+    let Spoint2 = float2{1000.0, 700.0 - (Sinter + (float(xScale) * Sslope)) * (550.0 / float(yScale))}
     gl.color(color_blue)
     gl.line(Spoint1, Spoint2, 5.0)
     //indicate Suply curve
@@ -126,10 +126,13 @@ Y scale = 550
 fatal(gl.window("Supply-Demand Simulation", 1324, 868))
 gl.set_font_name("Roboto-Regular.ttf")
 
-var DemandSlope = -5.0
-var DemandIntercept = 500.0
-var SupplySlope = 5.0
+var DemandSlope = -1.0
+var DemandIntercept = 100.0
+var SupplySlope = 1.0
 var SupplyIntercept = 0.0
+
+var xScale = 100
+var yScale = 100
 
 var cur_box = 0
 var num = -1
@@ -139,8 +142,8 @@ while gl.frame() and gl.button("escape") != 1:
     gl.clear(color_white)
 
     drawGraph()
-    drawLines(DemandSlope, DemandIntercept, SupplySlope, SupplyIntercept)
-    populateGraph(100, 550)
+    drawLines(DemandSlope, DemandIntercept, SupplySlope, SupplyIntercept, xScale, yScale)
+    populateGraph(xScale, yScale)
     if gl.button("mouse1") == 1 and gl.mouse_pos(0)[0] > 50 and gl.mouse_pos(0)[0] < 200:
         //change currently selected box based on
         if gl.mouse_pos(0)[1] > 50 and gl.mouse_pos(0)[1] < 150:
@@ -156,9 +159,11 @@ while gl.frame() and gl.button("escape") != 1:
         if gl.mouse_pos(0)[1] > 740 and gl.mouse_pos(0)[1] < 840:
             cur_box = 5
     drawBoxes(cur_box)
+    //check for digit press and act on currently selected box
     num = getDigit()
     if num != -1:
         if cur_box == 0:
+            //a little different because demand slope is always 0 or negetive (in simulation not always in real world)
             if num < 10:
                 DemandSlope = (DemandSlope * 10.0) - num
             else:
@@ -178,6 +183,22 @@ while gl.frame() and gl.button("escape") != 1:
                 SupplyIntercept = (SupplyIntercept * 10.0) + num
             else:
                 SupplyIntercept = float(floor(SupplyIntercept / 10.0))
-        
-    populateInputs(DemandSlope, DemandIntercept, SupplySlope, SupplyIntercept, 100, 550)
+        if cur_box == 4:
+            if num < 10:
+                xScale = (xScale * 10) + num
+            else:
+                xScale = floor(xScale / 10.0)
+        if cur_box == 5:
+            if num < 10:
+                yScale = (yScale * 10) + num
+            else:
+                yScale = floor(yScale / 10.0)
+    populateInputs(DemandSlope, DemandIntercept, SupplySlope, SupplyIntercept, xScale, yScale)
     //display outputs (equilibriums, surplus)
+
+    /*TODO:
+    output display
+    implement scaling into graph drawing
+    allow for scale control
+    make DS curves be within graphs borders
+    */
