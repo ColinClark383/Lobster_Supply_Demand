@@ -24,10 +24,48 @@ def drawGraph():
     gl.translate (int2{1025, 700}):
         gl.text("D")
 
+def findborders(slope, intercept, xScale, yScale):
+    /*
+    xmax = xScale
+    xmin = 0.0
+    ymax = yScale
+    ymin = 0.0
+    */
+    //return 2x2 matrix in form of x1 y1 x2 y2
+    let results = []
+    //check line x = 0.0
+    if intercept < yScale and intercept >= 0.0:
+        results.push([0.0, intercept])
+    //check line y = 0.0
+    if slope != 0.0 and (-intercept / slope) <= xScale and (-intercept / slope) > 0.0:
+        results.push([-intercept/slope, 0.0])
+    //check line y = yScale
+    if slope != 0.0 and ((yScale - intercept) / slope) < xScale and ((yScale - intercept) / slope) >= 0.0:
+        results.push([((yScale - intercept) / slope), yScale])
+    //check line x = xScale
+    if(slope * xScale + intercept) <= yScale and (slope * xScale + intercept) > 0.0:
+        results.push([xScale, slope * xScale + intercept])
+
+    if results.length() != 2:
+        //line not in graph
+        return [[-2000.0, -2000.0], [-2000.0, -2000.0]]
+    
+    // make sure point 2 is rightmost, swap if not
+    if results[0][0] > results[1][0]:
+        let temp = results[0]
+        results[0] = results[1]
+        results[1] = temp
+
+    return results
+
+
+
+
 def drawLines(Dslope, Dinter, Sslope, Sinter, xScale, yScale):
     //find points for demand line
-    let Dpoint1 = float2{350.0, 700.0 - Dinter * (550.0 / float(yScale))}
-    let Dpoint2 = float2{1000.0, 700.0 - (Dinter + (float(xScale) * Dslope)) * (550.0 / float(yScale))}
+    let DemandPoints = findborders(Dslope, Dinter, xScale, yScale)
+    let Dpoint1 = float2{350.0 + DemandPoints[0][0] * (650.0/xScale), 150.0 + (yScale - DemandPoints[0][1]) * (550.0 / float(yScale))}
+    let Dpoint2 = float2{350.0 + DemandPoints[1][0] * (650.0/xScale), 150.0 + (yScale - DemandPoints[1][1]) * (550.0 / float(yScale))}
     gl.color(color_red)
     gl.line(Dpoint1, Dpoint2, 5.0)
     //indicate Demand curve
@@ -37,8 +75,9 @@ def drawLines(Dslope, Dinter, Sslope, Sinter, xScale, yScale):
 
 
     //find points for suply line
-    let Spoint1 = float2{350.0, 700.0 - Sinter * (550.0 / float(yScale))}
-    let Spoint2 = float2{1000.0, 700.0 - (Sinter + (float(xScale) * Sslope)) * (550.0 / float(yScale))}
+    let SupplyPoints = findborders(Sslope, Sinter, xScale, yScale)
+    let Spoint1 = float2{350.0 + SupplyPoints[0][0] * (650.0/xScale), 150.0 + (yScale - SupplyPoints[0][1]) * (550.0 / float(yScale))}
+    let Spoint2 = float2{350.0 + SupplyPoints[1][0] * (650.0/xScale), 150.0 + (yScale - SupplyPoints[1][1]) * (550.0 / float(yScale))}
     gl.color(color_blue)
     gl.line(Spoint1, Spoint2, 5.0)
     //indicate Suply curve
@@ -115,13 +154,6 @@ def getDigit():
         return 10
     return -1
 
-    
-/*
-so i want some variables to be changeable but i need to code that in later
-
-X scale = 100
-Y scale = 550
-*/
 
 fatal(gl.window("Supply-Demand Simulation", 1324, 868))
 gl.set_font_name("Roboto-Regular.ttf")
@@ -183,6 +215,7 @@ while gl.frame() and gl.button("escape") != 1:
                 SupplyIntercept = (SupplyIntercept * 10.0) + num
             else:
                 SupplyIntercept = float(floor(SupplyIntercept / 10.0))
+        // scales use int values
         if cur_box == 4:
             if num < 10:
                 xScale = (xScale * 10) + num
@@ -198,7 +231,4 @@ while gl.frame() and gl.button("escape") != 1:
 
     /*TODO:
     output display
-    implement scaling into graph drawing
-    allow for scale control
-    make DS curves be within graphs borders
     */
