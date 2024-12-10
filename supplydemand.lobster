@@ -105,14 +105,20 @@ def populateInputs(Dslope, Dinter, Sslope, Sinter, xScale, yScale):
         gl.text("Y Scale")
     gl.translate (int2{90, 788}):
         gl.text(string(yScale))
+
+def getDigit():
+    //returns digit if pressed, returns 10 if backspace, returns -1 otherwise
+    for(10) i:
+        if gl.button(string(i)) == 1 or gl.button("keypad " + i) == 1:
+            return i
+    if gl.button("backspace") == 1:
+        return 10
+    return -1
+
     
 /*
 so i want some variables to be changeable but i need to code that in later
 
-Demand slope = -5.0
-Demand Intercept = 500.0
-Suply slope = 5.0
-Suply Intercept = 0.0
 X scale = 100
 Y scale = 550
 */
@@ -120,14 +126,20 @@ Y scale = 550
 fatal(gl.window("Supply-Demand Simulation", 1324, 868))
 gl.set_font_name("Roboto-Regular.ttf")
 
+var DemandSlope = -5.0
+var DemandIntercept = 500.0
+var SupplySlope = 5.0
+var SupplyIntercept = 0.0
+
 var cur_box = 0
+var num = -1
 
 while gl.frame() and gl.button("escape") != 1:
 
     gl.clear(color_white)
 
     drawGraph()
-    drawLines(-5.0, 500.0, 5.0, 0.0)
+    drawLines(DemandSlope, DemandIntercept, SupplySlope, SupplyIntercept)
     populateGraph(100, 550)
     if gl.button("mouse1") == 1 and gl.mouse_pos(0)[0] > 50 and gl.mouse_pos(0)[0] < 200:
         //change currently selected box based on
@@ -144,6 +156,28 @@ while gl.frame() and gl.button("escape") != 1:
         if gl.mouse_pos(0)[1] > 740 and gl.mouse_pos(0)[1] < 840:
             cur_box = 5
     drawBoxes(cur_box)
-    //adjust inputs (0-9 + backspace)
-    populateInputs(-5.0, 500.0, 5.0, 0.0, 100, 550)
+    num = getDigit()
+    if num != -1:
+        if cur_box == 0:
+            if num < 10:
+                DemandSlope = (DemandSlope * 10.0) - num
+            else:
+                DemandSlope = float(ceiling(DemandSlope / 10.0))
+        if cur_box == 1:
+            if num < 10:
+                DemandIntercept = (DemandIntercept * 10.0) + num
+            else:
+                DemandIntercept = float(floor(DemandIntercept / 10.0))
+        if cur_box == 2:
+            if num < 10:
+                SupplySlope = (SupplySlope * 10.0) + num
+            else:
+                SupplySlope = float(floor(SupplySlope / 10.0))
+        if cur_box == 3:
+            if num < 10:
+                SupplyIntercept = (SupplyIntercept * 10.0) + num
+            else:
+                SupplyIntercept = float(floor(SupplyIntercept / 10.0))
+        
+    populateInputs(DemandSlope, DemandIntercept, SupplySlope, SupplyIntercept, 100, 550)
     //display outputs (equilibriums, surplus)
