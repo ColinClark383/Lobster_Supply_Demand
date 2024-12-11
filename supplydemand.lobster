@@ -154,6 +154,63 @@ def getDigit():
         return 10
     return -1
 
+def populateOutputs(Dslope, Dinter, Sslope, Sinter):
+    //calculate values and record if they can be calculated (cant divide by 0)
+    var equilibriumExists = true
+    var SelacityExists = true
+    var DelacicityExists = true
+    var eqP = 0.0
+    var eqQ = 0.0
+    var sEla = 0.0
+    var dEla = 0.0
+    if (Dslope - Sslope) == 0.0:
+        equilibriumExists = false
+    else:
+        eqQ = (Sinter - Dinter) / (Dslope - Sslope)
+        eqP = (Dslope * eqQ) + Dinter
+    if (not equilibriumExists) or (eqQ == 0.0 or Sslope == 0.0):
+        SelacityExists = false
+    else:
+        sEla = eqP / (Sslope * eqQ)
+    if (not equilibriumExists) or (eqQ == 0.0 or Dslope == 0.0):
+        DelacicityExists = false
+    else:
+        dEla = eqP / (Dslope * eqQ)
+    //display values if can be displayed
+    gl.color(color_black)
+    gl.set_font_size(24)
+    gl.translate (int2{1100, 250}):
+        gl.text("Equilibrium Price")
+    gl.translate (int2{1100, 275}):
+        if equilibriumExists:
+            gl.text(string(eqP))
+        else:
+            gl.text(string("Not Computable"))
+    gl.translate (int2{1100, 325}):
+        gl.text("Equilibrium Quantity")
+    gl.translate (int2{1100, 350}):
+        if equilibriumExists:
+            gl.text(string(eqQ))
+        else:
+            gl.text(string("Not Computable"))
+    gl.translate (int2{1100, 400}):
+        gl.text("At Equilibrium:")
+    gl.translate (int2{1100, 450}):
+        gl.text("Supply Elasticity")
+    gl.translate (int2{1100, 475}):
+        if SelacityExists:
+            gl.text(string(sEla))
+        else:
+            gl.text(string("Not Computable"))
+    gl.translate (int2{1100, 525}):
+        gl.text("Demand Elasticity")
+    gl.translate (int2{1100, 575}):
+        if DelacicityExists:
+            gl.text(string(dEla))
+        else:
+            gl.text(string("Not Computable"))
+    
+    
 
 fatal(gl.window("Supply-Demand Simulation", 1324, 868))
 gl.set_font_name("Roboto-Regular.ttf")
@@ -227,7 +284,8 @@ while gl.frame() and gl.button("escape") != 1:
             else:
                 yScale = floor(yScale / 10.0)
     populateInputs(DemandSlope, DemandIntercept, SupplySlope, SupplyIntercept, xScale, yScale)
-    //display outputs (equilibriums, surplus)
+    populateOutputs(DemandSlope, DemandIntercept, SupplySlope, SupplyIntercept)
+    //display outputs (equilibriums, surplus, elacity)
 
     /*TODO:
     output display
